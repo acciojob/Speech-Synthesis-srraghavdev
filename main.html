@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <title>Speech Synthesis</title>
   <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
 
@@ -29,13 +29,50 @@
     </div>
 
 <script>
-  const msg = new SpeechSynthesisUtterance();
+  
+  let msg = new SpeechSynthesisUtterance();
   let voices = [];
   const voicesDropdown = document.querySelector('[name="voice"]');
   const options = document.querySelectorAll('[type="range"], [name="text"]');
   const speakButton = document.querySelector('#speak');
   const stopButton = document.querySelector('#stop');
+  const synth = window.speechSynthesis
 
+   async function voicespopulate(){
+    voices= await new Promise(resolve=>{
+      let temp =setInterval(()=>{
+        if(synth.getVoices().length!=0){
+          clearInterval(temp)
+          resolve(synth.getVoices())
+        }
+      },10)
+     })
+     console.log(voices)
+     voicesDropdown.innerHTML=''
+     for(let i=0;i<voices.length;i++){
+      let temp=document.createElement('option')
+      temp.value=i
+      temp.innerText=`${voices[i].name}`
+      voicesDropdown.append(temp)
+     }
+   }
+   voicespopulate()
+	speakButton.addEventListener('click',()=>{
+    if(synth.paused){
+      synth.resume()
+    }
+    else{
+    msg= new SpeechSynthesisUtterance(options[2].value);
+    msg.pitch=options[1].value
+    msg.rate=options[0].value
+    msg.voice=voices[voicesDropdown.value]
+    synth.speak(msg)
+    }
+  })
+  stopButton.addEventListener('click',()=>{
+    synth.pause()
+  })
+  
   //Your code goes here
 </script>
 
